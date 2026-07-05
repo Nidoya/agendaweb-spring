@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="titulo">
+    <h1>Agenda Full Stack</h1>
+
+    <input id="idNombre" type="text"  placeholder="Nombre">
+    <input id="idTelefono" type="tel" placeholder="Teléfono">
+    <input id="idEmail" type="text" placeholder="Correo Electrónico">
+    <button class="guardarContacto" onclick="guardarContacto()">Guardar Contácto</button>
+    <button id="actualizarBoton" onclick="ejecutarActualizacion()">Actualizar Cambios</button>
+
+    <h3>Lista de Contactos Guardados</h3>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Telefono</th>
+                <th>Email</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <!-- 👁️ OJO A ESTA LÍNEA: El cuerpo se queda vacío pero con su DNI -->
+         <tbody id="cuerpoTabla">
+            <!-- JavaScript pintará las filas aquí dentro solo cuando hagamos la petición -->
+         </tbody>
+    </table>
+
+    <!-- 🔄 BOTÓN PARA REFRESCAR LA LISTA -->
+     <button class="cargarAgenda" onclick="cargarTodosLosContactos()">🔄 Sincronizar Agenda</button>
+
+    <div id="resultado">Esperando datos...</div>
+</div>
+<script>
+    // Imagínate que document es toda tu página web. Al decirle getElementById('DNI_DE_TU_CAJA'), JavaScript lanza un imán que 
+    // busca por toda la página hasta encontrar la caja que tenga ese DNI exacto.
+    // Pero si solo pones eso, capturas la caja física (con sus bordes, su color, etc.). Para sacar el texto que el usuario ha escrito 
+    // dentro, tienes que añadirle al final el punto mágico: .value.
+    // Para guardar ese texto y que no se pierda, lo metemos dentro de una variable usando la palabra const (de constante).
+    function guardarContacto(){
+        const elNombre = document.getElementById('idNombre').value;
+        const elTelefono = document.getElementById('idTelefono').value;
+        const elEmail = document.getElementById('idEmail').value;
+
+        if(elTelefono.length !== 9){
+            alert('El teléfono debe ser 9 dígitos.');
+            return;
+        }
+        if(!elEmail.includes('@')){
+            alert('Debe tener @ su correo');
+            return;
+        }
+        
+
+        const paqueteContacto = {
+            nombre:elNombre,
+            telefono:elTelefono,
+            email:elEmail,
+            es_vip:false
+        };
+
+        console.log(paqueteContacto);
+
+        // Cambiar el botón a POST.
+        // En las cabeceras (Headers), decirle que le mandabas un application/json.
+        // En el Body, pegar el texto del JSON.
+
+        // JSON.stringify()
+        // Porque Spring Boot (Java) no tiene ni idea de qué es un objeto nativo de JavaScript. 
+        // Java solo entiende texto plano. JSON.stringify() lo que hace es coger tu objeto de JavaScript y "traducirlo" 
+        // a una cadena de texto con formato JSON (le pone las comillas a las claves y lo deja listo para viajar por el cable de red).
+        fetch('http://localhost:8080/api/contactos',{
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(paqueteContacto)
+            
+        })
+        .then(respuesta => {
+            // 🕵️‍♂️ Capturamos tu caja "resultado" del HTML para escribir en ella
+            const cajaTexto = document.getElementById('resultado');
+
+            // Miramos qué código de estado (status) nos escupe Spring Boot
+            if(respuesta.status === 201){
+                cajaTexto.innerHTML = "✅ ¡Guardado con éxito en MySQL!";
+                cajaTexto.style.color = "#a8ffb2"; // Te lo pinta en verde bonito
+
+                // 🧼 ¡Limpiamos las cajas aquí dentro!
+                document.getElementById('idNombre').value = '';
+                document.getElementById('idTelefono').value = '';
+                document.getElementById('idEmail').value = '';
+            }
+            
+            else if(respuesta.status === 400 ){
+                cajaTexto.innerHTML = "❌ Error: Revisa que el teléfono tenga 9 números o el email sea válido.";
+                cajaTexto.style = "#ff8888"; // Te lo pinta en rojo de alerta 
+            }
+        })
+        .catch(error => {
+            // Por si el servidor está apagado o se cae la conexión
+            document.getElementById('resultado').innerHTML = "💥 Error total de conexión.";
+        });
+    }
+
+
+
+
+    function cargarTodosLosContactos() {
+    
+    // 🚀 1. El mensajero fetch viaja a la API de Java (por defecto hace un GET)
+    fetch('http://localhost:8080/api/contactos')
+        .then(respuesta => respuesta.json()) // 📥 2. Traduce los bytes del cable a una lista de objetos legibles
+        .then(datos => {
+            console.log("Mis datos de Java:", datos);
+            // 🧲 3. Lanzamos el imán para atrapar el cuerpo vacío de la tabla HTML
+            const tabla = document.getElementById('cuerpoTabla');
+            
+            // 🧹 4. Vaciamos la tabla por completo antes de pintar
+            // Nota de DAW: Si no hacemos esto, cada vez que pulses el botón se volverían 
+            // a pintar los mismos contactos abajo, duplicando la lista en pantalla.
+            tabla.innerHTML = "";
+            
+            // 🔄 5. Arranca el bucle: "Por cada contacto que nos haya devuelto MySQL..."
+            datos.forEach(contacto => {
+                
+                // ✍️ 6. Sumamos (`+=`) una fila nueva `<tr>` con los datos reales
+                tabla.innerHTML += `
+                    <tr>
+                        <td>${contacto.nombre}</td>
+                        <td>${contacto.telefono}</td>
+                        <td>${contacto.email}</td>
+                        <td>
+                            <button class="boton-eliminar" onclick="eliminarContacto('${contacto.nombre}')">🗑️ Eliminar</button>
+                            <button class="boton-modificar" onclick="modificarContacto('${contacto.nombre}','${contacto.telefono}','${contacto.email}')">Modificar</button>
+                    </tr>
+                `;
+            });
+            
+        })
+        .catch(error => {
+            // 💥 Por si el servidor de Spring Boot está apagado
+            console.error("Error al conectar con el servidor:", error);
+        });
+}
+
+
+
+function eliminarContacto(nombre) {
+    
+    // 🚀 Mandamos al mensajero con el método DELETE y el ID en la ruta
+    fetch('http://localhost:8080/api/contactos/' + nombre, {
+        method: 'DELETE'
+    })
+    .then(respuesta => {
+        // 🔄 Si el borrado ha ido bien, refrescamos la tabla automáticamente
+        cargarTodosLosContactos();
+    })
+    .catch(error => {
+        console.error("Error al eliminar el contacto:", error);
+    });
+}
+
+
+function modificarContacto(nombre,telefono,email){
+
+    document.getElementById('idNombre').value=nombre;
+    document.getElementById('idTelefono').value=telefono;
+    document.getElementById('idEmail').value=email;
+
+    document.getElementById('actualizarBoton').style.display = 'block';
+
+}
+
+
+
+function ejecutarActualizacion(){
+
+    const nuevoNombre = document.getElementById('idNombre').value;
+        const nuevoTelefono = document.getElementById('idTelefono').value;
+        const nuevoEmail = document.getElementById('idEmail').value;
+
+        if(nuevoTelefono.length !== 9){
+            alert('El teléfono debe ser de 9 dígitos');
+            return;
+        }
+        if(!nuevoEmail.includes('@')){
+            alert('Debe tener @ su correo');
+            return;
+        }
+
+        const actualizarContactos = {
+            nombre:nuevoNombre,
+            telefono:nuevoTelefono,
+            email:nuevoEmail,
+            es_vip:false
+        };
+
+        fetch('http://localhost:8080/api/contactos',{
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(actualizarContactos)
+            
+        })
+
+        .then(respuesta =>{
+            cargarTodosLosContactos();
+
+            // 🧹 2. Limpiamos las cajas de texto del formulario
+            document.getElementById('idNombre').value = '';
+            document.getElementById('idTelefono').value = '';
+            document.getElementById('idEmail').value = '';
+
+            // 🙈 3. Ocultamos el botón de actualizar cambios
+            document.getElementById('actualizarBoton').style.display = 'none';
+        })
+        .catch(error =>{
+            console.error("Fallo al cargar los Contactos",error)
+        });
+
+}
+</script>
+</body>
+</html>

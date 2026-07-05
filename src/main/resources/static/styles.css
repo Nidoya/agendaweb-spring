@@ -1,0 +1,119 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #1e1e24;
+    color: white;
+    text-align: center;
+    padding: 30px;
+}
+
+.titulo {
+    max-width: 800px;
+    margin: 0 auto;
+    background-color: #2a2a35;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+h1 { color: #4CAF50; }
+
+input {
+    width: 90%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #444;
+    border-radius: 4px;
+    background-color: #1e1e24;
+    color: white;
+}
+
+button {
+    color: white;
+    padding: 12px 20px;
+    font-size: 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    width: 100%;
+    margin-top: 10px;
+    font-weight: bold;
+}
+
+.guardarContacto{
+    background-color: #4CAF50;
+    transition: 1s;
+}
+button:hover {background-color: #45a049; }
+
+
+#actualizarBoton{
+    background-color: #216cc2;
+    transition: 1s;
+    display: none;
+    
+}
+#actualizarBoton:hover{background-color: #2454f0;}
+
+
+
+
+.cargarAgenda{
+    background-color: #4CAF50;
+    transition: 1s;
+}
+.cargarAgenda:hover{background-color: #45a049;}
+
+
+.boton-eliminar{
+    background-color: #ff4444;
+    transition: 1s;
+}
+.boton-eliminar:hover{background-color: #eb1c1c;}
+
+
+
+.boton-modificar{
+    background-color: #216cc2;
+    transition: 1s;
+}
+.boton-modificar:hover{background-color: #2454f0;}
+
+
+
+th,td{
+    padding: 12px;
+    border-bottom: 2px solid #444;
+}
+
+table{
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th{
+    color: #4CAF50;
+    background-color: #1e1e24;
+}
+th:first-child{ /* Para centrarse en la primera columna */
+    border-top-left-radius: 5px;
+}
+th:last-child{ /* Para centrarse en la última columna */
+    border-top-right-radius: 5px;
+}
+
+th:hover{
+    background-color: #25252f;
+}
+
+
+input:focus{
+    background-color: #151518;
+}
+
+
+#resultado {
+    margin-top: 20px;
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 4px;
+}
