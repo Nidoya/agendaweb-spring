@@ -74,7 +74,7 @@
         // Porque Spring Boot (Java) no tiene ni idea de qué es un objeto nativo de JavaScript. 
         // Java solo entiende texto plano. JSON.stringify() lo que hace es coger tu objeto de JavaScript y "traducirlo" 
         // a una cadena de texto con formato JSON (le pone las comillas a las claves y lo deja listo para viajar por el cable de red).
-        fetch('http://localhost:8080/api/contactos',{
+        fetch('/api/contactos',{
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -114,7 +114,7 @@
     function cargarTodosLosContactos() {
     
     // 🚀 1. El mensajero fetch viaja a la API de Java (por defecto hace un GET)
-    fetch('http://localhost:8080/api/contactos')
+    fetch('/api/contactos')
         .then(respuesta => respuesta.json()) // 📥 2. Traduce los bytes del cable a una lista de objetos legibles
         .then(datos => {
             console.log("Mis datos de Java:", datos);
@@ -154,7 +154,7 @@
 function eliminarContacto(nombre) {
     
     // 🚀 Mandamos al mensajero con el método DELETE y el ID en la ruta
-    fetch('http://localhost:8080/api/contactos/' + nombre, {
+    fetch('/api/contactos/' + nombre, {
         method: 'DELETE'
     })
     .then(respuesta => {
@@ -201,7 +201,7 @@ function ejecutarActualizacion(){
             es_vip:false
         };
 
-        fetch('http://localhost:8080/api/contactos',{
+        fetch('/api/contactos',{
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'
